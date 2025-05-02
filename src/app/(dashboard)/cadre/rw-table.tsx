@@ -33,165 +33,196 @@ import {
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { AddCadre } from './add-cadre';
-import {
-  calculateRWHomeReports,
-  calculateRWPayrollPayment,
-  calculateRWSocialAssistance,
-  RW,
-} from './cadre';
-import { rwData } from './cadre-mock-data';
+import { fetchRWList } from './data';
+import { RW } from './data/definitions';
 import { RTTable } from './rt-table';
 
 export const riskLevelColors = {
-  safe: { bg: 'bg-green-100', text: 'text-green-800', number: 1 },
-  standby: { bg: 'bg-blue-100', text: 'text-blue-800', number: 2 },
-  alert: { bg: 'bg-yellow-100', text: 'text-yellow-800', number: 3 },
-  danger: { bg: 'bg-orange-100', text: 'text-orange-800', number: 4 },
-  critical: { bg: 'bg-red-100', text: 'text-red-800', number: 5 },
+  1: { bg: 'bg-green-100', text: 'text-green-800', number: 1 },
+  2: { bg: 'bg-blue-100', text: 'text-blue-800', number: 2 },
+  3: { bg: 'bg-yellow-100', text: 'text-yellow-800', number: 3 },
+  4: { bg: 'bg-orange-100', text: 'text-orange-800', number: 4 },
+  5: { bg: 'bg-red-100', text: 'text-red-800', number: 5 },
 } as const;
 
-export const columns: ColumnDef<(typeof rwData)[0]>[] = [
-  {
-    accessorKey: 'rw',
-    header: ({ column }) => {
-      return (
-        <button
-          className="flex items-center gap-1 hover:text-primary [&_svg:not([class*='size-'])]:size-4"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          RW
-          {column.getIsSorted() === 'desc' ? (
-            <ChevronDown />
-          ) : column.getIsSorted() === 'asc' ? (
-            <ChevronUp />
-          ) : (
-            <ChevronsUpDown />
-          )}
-        </button>
-      );
-    },
-  },
-  {
-    accessorKey: 'homeReports',
-    header: ({ column }) => {
-      return (
-        <button
-          className="flex items-center gap-1 hover:text-primary [&_svg:not([class*='size-'])]:size-4"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Home Reports (&lt; 30 days)
-          {column.getIsSorted() === 'desc' ? (
-            <ChevronDown />
-          ) : column.getIsSorted() === 'asc' ? (
-            <ChevronUp />
-          ) : (
-            <ChevronsUpDown />
-          )}
-        </button>
-      );
-    },
-    cell: ({ row }) => {
-      const rw = row.original;
-      const total = calculateRWHomeReports(rw);
-      return total;
-    },
-  },
-  {
-    accessorKey: 'riskLevel',
-    header: 'Risk Level (< 30 days)',
-    cell: ({ row }) => {
-      const level = row.getValue('riskLevel') as keyof typeof riskLevelColors;
-      const { bg, text, number } = riskLevelColors[level];
-      return (
-        <div className="flex items-center gap-2">
-          <div
-            className={cn(
-              'flex size-6 items-center justify-center rounded-full font-medium',
-              bg,
-              text
-            )}
-          >
-            {number}
-          </div>
-          <span className="capitalize">{level}</span>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: 'socialAssistance',
-    header: ({ column }) => {
-      return (
-        <button
-          className="flex items-center gap-1 hover:text-primary [&_svg:not([class*='size-'])]:size-4"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Social Assistance Needed
-          {column.getIsSorted() === 'desc' ? (
-            <ChevronDown />
-          ) : column.getIsSorted() === 'asc' ? (
-            <ChevronUp />
-          ) : (
-            <ChevronsUpDown />
-          )}
-        </button>
-      );
-    },
-    cell: ({ row }) => {
-      const rw = row.original;
-      const total = calculateRWSocialAssistance(rw);
-      return `${total} House${total !== 1 ? 's' : ''}`;
-    },
-  },
-  {
-    accessorKey: 'payrollPayment',
-    header: ({ column }) => {
-      return (
-        <button
-          className="flex items-center gap-1 hover:text-primary [&_svg:not([class*='size-'])]:size-4"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Payroll Payment
-          {column.getIsSorted() === 'desc' ? (
-            <ChevronDown />
-          ) : column.getIsSorted() === 'asc' ? (
-            <ChevronUp />
-          ) : (
-            <ChevronsUpDown />
-          )}
-        </button>
-      );
-    },
-    cell: ({ row }) => {
-      const rw = row.original;
-      const payrollPayment = calculateRWPayrollPayment(rw);
-      return `${payrollPayment.paid}/${payrollPayment.total}`;
-    },
-  },
-];
+type RiskLevel = keyof typeof riskLevelColors;
 
 export function RWTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [rwData, setRWData] = useState<RW[]>([]);
 
-  const toggleRow = (rw: string) => {
+  React.useEffect(() => {
+    const loadData = async () => {
+      const data = await fetchRWList();
+      setRWData(data);
+    };
+    loadData();
+  }, []);
+
+  const toggleRow = (rwId: string) => {
     const newExpandedRows = new Set(expandedRows);
-    if (newExpandedRows.has(rw)) {
-      newExpandedRows.delete(rw);
+    if (newExpandedRows.has(rwId)) {
+      newExpandedRows.delete(rwId);
     } else {
-      newExpandedRows.add(rw);
+      newExpandedRows.add(rwId);
     }
     setExpandedRows(newExpandedRows);
   };
 
   const rwFilter: FilterFn<RW> = (row, columnId, filterValue) => {
-    return row.original.rw.toLowerCase().includes(filterValue.toLowerCase());
+    return row.original.rwName
+      .toLowerCase()
+      .includes(filterValue.toLowerCase());
   };
+
+  const columns: ColumnDef<RW>[] = [
+    {
+      id: 'expand',
+      header: () => null,
+      cell: ({ row }) => {
+        const isExpanded = expandedRows.has(row.original.rwId);
+        return row.original.rts ? (
+          <div className="flex items-center justify-center">
+            {isExpanded ? (
+              <ChevronDown className="size-4" />
+            ) : (
+              <ChevronRight className="size-4" />
+            )}
+          </div>
+        ) : null;
+      },
+    },
+    {
+      accessorKey: 'rwName',
+      header: ({ column }) => {
+        return (
+          <button
+            className="flex items-center gap-1 hover:text-primary [&_svg:not([class*='size-'])]:size-4"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            RW
+            {column.getIsSorted() === 'desc' ? (
+              <ChevronDown />
+            ) : column.getIsSorted() === 'asc' ? (
+              <ChevronUp />
+            ) : (
+              <ChevronsUpDown />
+            )}
+          </button>
+        );
+      },
+    },
+    {
+      accessorKey: 'totalInspections',
+      header: ({ column }) => {
+        return (
+          <button
+            className="flex items-center gap-1 hover:text-primary [&_svg:not([class*='size-'])]:size-4"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Home Reports
+            {column.getIsSorted() === 'desc' ? (
+              <ChevronDown />
+            ) : column.getIsSorted() === 'asc' ? (
+              <ChevronUp />
+            ) : (
+              <ChevronsUpDown />
+            )}
+          </button>
+        );
+      },
+    },
+    {
+      accessorKey: 'riskLevel',
+      header: 'Risk Level',
+      cell: ({ row }) => {
+        const level = row.getValue('riskLevel') as number;
+        const { bg, text, number } = riskLevelColors[level as RiskLevel];
+        return (
+          <div className="flex items-center gap-2">
+            <div
+              className={cn(
+                'flex size-6 items-center justify-center rounded-full font-medium',
+                bg,
+                text
+              )}
+            >
+              {number}
+            </div>
+            <span className="capitalize">
+              {level === 1
+                ? 'Safe'
+                : level === 2
+                ? 'Standby'
+                : level === 3
+                ? 'Alert'
+                : level === 4
+                ? 'Danger'
+                : 'Critical'}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'needsBansosSum',
+      header: ({ column }) => {
+        return (
+          <button
+            className="flex items-center gap-1 hover:text-primary [&_svg:not([class*='size-'])]:size-4"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Social Assistance Needed
+            {column.getIsSorted() === 'desc' ? (
+              <ChevronDown />
+            ) : column.getIsSorted() === 'asc' ? (
+              <ChevronUp />
+            ) : (
+              <ChevronsUpDown />
+            )}
+          </button>
+        );
+      },
+      cell: ({ row }) => {
+        const total = row.getValue('needsBansosSum') as number;
+        return `${total} House${total !== 1 ? 's' : ''}`;
+      },
+    },
+    {
+      accessorKey: 'paidCadresCount',
+      header: ({ column }) => {
+        return (
+          <button
+            className="flex items-center gap-1 hover:text-primary [&_svg:not([class*='size-'])]:size-4"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Payroll Payment
+            {column.getIsSorted() === 'desc' ? (
+              <ChevronDown />
+            ) : column.getIsSorted() === 'asc' ? (
+              <ChevronUp />
+            ) : (
+              <ChevronsUpDown />
+            )}
+          </button>
+        );
+      },
+      cell: ({ row }) => {
+        const paid = row.getValue('paidCadresCount') as number;
+        const total = row.original.rts.reduce(
+          (acc, rt) => acc + rt.cadres.length,
+          0
+        );
+        return `${paid}/${total}`;
+      },
+    },
+  ];
 
   const table = useReactTable({
     data: rwData,
-    columns,
+    columns: columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
@@ -258,10 +289,13 @@ export function RWTable() {
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 const rw = row.original;
-                const isExpanded = expandedRows.has(rw.rw);
+                const isExpanded = expandedRows.has(rw.rwId);
                 return (
-                  <React.Fragment key={rw.rw}>
-                    <TableRow>
+                  <React.Fragment key={rw.rwId}>
+                    <TableRow
+                      className="hover:bg-muted/50"
+                      onClick={() => rw.rts && toggleRow(rw.rwId)}
+                    >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
                           {flexRender(
@@ -270,25 +304,14 @@ export function RWTable() {
                           )}
                         </TableCell>
                       ))}
-                      <TableCell>
-                        {rw.rtData && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => toggleRow(rw.rw)}
-                          >
-                            {isExpanded ? <ChevronUp /> : <ChevronDown />}
-                          </Button>
-                        )}
-                      </TableCell>
                     </TableRow>
-                    {isExpanded && rw.rtData && (
+                    {isExpanded && rw.rts && (
                       <TableRow>
                         <TableCell
                           className="hover:bg-background"
-                          colSpan={columns.length + 1}
+                          colSpan={table.getAllColumns().length}
                         >
-                          <RTTable rtData={rw.rtData} />
+                          <RTTable rtData={rw.rts} />
                         </TableCell>
                       </TableRow>
                     )}
@@ -298,7 +321,7 @@ export function RWTable() {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length + 1}
+                  colSpan={table.getAllColumns().length}
                   className="h-24 text-center"
                 >
                   No results.

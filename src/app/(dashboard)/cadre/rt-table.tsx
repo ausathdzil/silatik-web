@@ -1,12 +1,7 @@
 'use client';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Drawer,
   DrawerContent,
@@ -14,7 +9,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
-import { Separator } from '@/components/ui/separator';
 import {
   Table,
   TableBody,
@@ -23,7 +17,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import {
   ColumnDef,
@@ -33,22 +26,12 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table';
-import {
-  CheckCircleIcon,
-  ChevronDown,
-  ChevronsUpDown,
-  ChevronUp,
-  CircleIcon,
-  XCircleIcon,
-} from 'lucide-react';
-import { useState } from 'react';
-import {
-  Cadre,
-  calculateRTHomeReports,
-  calculateRTSocialAssistance,
-  RT,
-} from './cadre';
+import { ChevronDown, ChevronsUpDown, ChevronUp } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Cadre, RT, Inspection, Household } from './data/definitions';
 import { riskLevelColors } from './rw-table';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { fetchInspectionHistory, fetchHouseholds } from './data';
 
 type RiskLevel = keyof typeof riskLevelColors;
 
@@ -61,7 +44,7 @@ export function RTTable({ rtData }: RTTableProps) {
 
   const columns: ColumnDef<RT>[] = [
     {
-      accessorKey: 'rt',
+      accessorKey: 'rtName',
       header: ({ column }) => {
         return (
           <button
@@ -81,14 +64,14 @@ export function RTTable({ rtData }: RTTableProps) {
       },
     },
     {
-      accessorKey: 'homeReports',
+      accessorKey: 'totalInspections',
       header: ({ column }) => {
         return (
           <button
             className="flex items-center gap-1 hover:text-primary [&_svg:not([class*='size-'])]:size-4"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Home Reports (&lt; 30 days)
+            Home Reports
             {column.getIsSorted() === 'desc' ? (
               <ChevronDown />
             ) : column.getIsSorted() === 'asc' ? (
@@ -99,18 +82,13 @@ export function RTTable({ rtData }: RTTableProps) {
           </button>
         );
       },
-      cell: ({ row }) => {
-        const rt = row.original;
-        const total = calculateRTHomeReports(rt);
-        return total;
-      },
     },
     {
       accessorKey: 'riskLevel',
-      header: 'Risk Level (< 30 days)',
+      header: 'Risk Level',
       cell: ({ row }) => {
-        const level = row.getValue('riskLevel') as RiskLevel;
-        const { bg, text, number } = riskLevelColors[level];
+        const level = row.getValue('riskLevel') as number;
+        const { bg, text, number } = riskLevelColors[level as RiskLevel];
         return (
           <div className="flex items-center gap-2">
             <div
@@ -122,13 +100,23 @@ export function RTTable({ rtData }: RTTableProps) {
             >
               {number}
             </div>
-            <span className="capitalize">{level}</span>
+            <span className="capitalize">
+              {level === 1
+                ? 'Safe'
+                : level === 2
+                ? 'Standby'
+                : level === 3
+                ? 'Alert'
+                : level === 4
+                ? 'Danger'
+                : 'Critical'}
+            </span>
           </div>
         );
       },
     },
     {
-      accessorKey: 'socialAssistance',
+      accessorKey: 'needsBansosSum',
       header: ({ column }) => {
         return (
           <button
@@ -147,8 +135,7 @@ export function RTTable({ rtData }: RTTableProps) {
         );
       },
       cell: ({ row }) => {
-        const rt = row.original;
-        const total = calculateRTSocialAssistance(rt);
+        const total = row.getValue('needsBansosSum') as number;
         return `${total} House${total !== 1 ? 's' : ''}`;
       },
     },
@@ -188,7 +175,7 @@ export function RTTable({ rtData }: RTTableProps) {
           {table.getRowModel().rows.map((row) => {
             const rt = row.original;
             return (
-              <Drawer key={rt.rt}>
+              <Drawer key={rt.rtId}>
                 <DrawerTrigger asChild>
                   <TableRow>
                     {row.getVisibleCells().map((cell) => (
@@ -220,27 +207,26 @@ function CadreDrawer({ cadres }: { cadres: Cadre[] }) {
         </DrawerHeader>
         <div className="p-4 flex items-center justify-center gap-4">
           {cadres.map((cadre) => (
-            <CadreCard key={cadre.name} cadre={cadre} />
+            <CadreCard key={cadre.cadreId} cadre={cadre} />
           ))}
         </div>
 
         <h2 className="text-sm font-medium text-center mt-4">Inspections</h2>
 
         <div className="p-4 w-full max-w-3/4 mx-auto">
-          <Tabs defaultValue={cadres[0].name}>
+          <Tabs defaultValue={cadres[0].cadreId}>
             <TabsList className="w-full justify-center">
               {cadres.map((cadre) => (
-                <TabsTrigger key={cadre.name} value={cadre.name}>
-                  {cadre.name}
+                <TabsTrigger key={cadre.cadreId} value={cadre.cadreId}>
+                  {cadre.cadreName}
                 </TabsTrigger>
               ))}
             </TabsList>
-            <TabsContent value={cadres[0].name}>
-              <CadreInspectionTable cadre={cadres[0]} />
-            </TabsContent>
-            <TabsContent value={cadres[1].name}>
-              <CadreInspectionTable cadre={cadres[1]} />
-            </TabsContent>
+            {cadres.map((cadre) => (
+              <TabsContent key={cadre.cadreId} value={cadre.cadreId}>
+                <CadreInspectionTable cadre={cadre} />
+              </TabsContent>
+            ))}
           </Tabs>
         </div>
       </div>
@@ -254,43 +240,11 @@ function CadreCard({ cadre }: { cadre: Cadre }) {
       <CardHeader>
         <div className="flex items-center gap-4">
           <Avatar className="size-16">
-            <AvatarFallback>{cadre.name.charAt(0)}</AvatarFallback>
+            <AvatarFallback>{cadre.cadreName.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <CardTitle>
-                {cadre.name}, {cadre.age}
-              </CardTitle>
-              {cadre.status === 'active' ? (
-                <div className="bg-blue-100 text-blue-700 rounded-full px-2 py-1 text-xs flex items-center gap-1">
-                  <CircleIcon className="size-4 fill-blue-700" />
-                  Active
-                </div>
-              ) : (
-                <div className="bg-red-100 text-red-700 rounded-full px-2 py-1 text-xs flex items-center gap-1">
-                  <XCircleIcon className="size-4" />
-                  Inactive
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-2 h-5">
-              <CardDescription>{cadre.phone}</CardDescription>
-              <Separator orientation="vertical" className="h-4" />
-              <span className="text-sm">{cadre.address}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm">Payroll:</span>
-              {cadre.wageStatus === 'paid' ? (
-                <div className="bg-green-100 text-green-700 rounded-full px-2 py-1 text-xs flex items-center gap-1">
-                  <CheckCircleIcon className="size-4" />
-                  Paid
-                </div>
-              ) : (
-                <div className="bg-red-100 text-red-700 rounded-full px-2 py-1 text-xs flex items-center gap-1">
-                  <XCircleIcon className="size-4" />
-                  Unpaid
-                </div>
-              )}
+              <CardTitle>{cadre.cadreName}</CardTitle>
             </div>
           </div>
         </div>
@@ -300,32 +254,77 @@ function CadreCard({ cadre }: { cadre: Cadre }) {
 }
 
 function CadreInspectionTable({ cadre }: { cadre: Cadre }) {
+  const [inspections, setInspections] = useState<Inspection[]>([]);
+  const [households, setHouseholds] = useState<Record<string, Household>>({});
+
+  useEffect(() => {
+    const loadData = async () => {
+      const [inspectionData, householdData] = await Promise.all([
+        fetchInspectionHistory(),
+        fetchHouseholds(),
+      ]);
+      setInspections(inspectionData);
+
+      // Create a map of householdId to household data
+      const householdMap = householdData.reduce(
+        (acc: Record<string, Household>, household: Household) => {
+          acc[household.householdId] = household;
+          return acc;
+        },
+        {}
+      );
+
+      setHouseholds(householdMap);
+    };
+    loadData();
+  }, []);
+
+  const cadreInspections = inspections.filter(
+    (inspection) => inspection.lastUpdatedByUserId === cadre.cadreId
+  );
+
   return (
     <div className="overflow-hidden rounded-lg border">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Date</TableHead>
-            <TableHead>Resident</TableHead>
+            <TableHead>Resident Name</TableHead>
             <TableHead>Address</TableHead>
-            <TableHead>Larvae Spots</TableHead>
-            <TableHead>DF Case</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>DBD Case</TableHead>
             <TableHead>Social Assistance</TableHead>
+            <TableHead>Review Notes</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {cadre.inspection?.map((inspection) => (
-            <TableRow key={inspection.date}>
-              <TableCell>{inspection.date}</TableCell>
-              <TableCell>{inspection.resident}</TableCell>
-              <TableCell>{inspection.address}</TableCell>
-              <TableCell>{inspection.larvaeSpots}</TableCell>
-              <TableCell>{inspection.dfCase ? 'Yes' : 'No'}</TableCell>
-              <TableCell>
-                {inspection.socialAssistance ? 'Yes' : 'No'}
-              </TableCell>
-            </TableRow>
-          ))}
+          {cadreInspections.map((inspection) => {
+            const household = households[inspection.householdId];
+            return (
+              <TableRow key={inspection.inspectionId}>
+                <TableCell>{inspection.inspectionDate}</TableCell>
+                <TableCell>{household?.houseOwnerName || '-'}</TableCell>
+                <TableCell>{household?.fullAddress || '-'}</TableCell>
+                <TableCell>
+                  <span
+                    className={cn(
+                      'px-2 py-1 rounded-full text-xs capitalize',
+                      inspection.status === 'completed'
+                        ? 'bg-green-100 text-green-800'
+                        : inspection.status === 'scheduled'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-gray-100 text-gray-800'
+                    )}
+                  >
+                    {inspection.status}
+                  </span>
+                </TableCell>
+                <TableCell>{inspection.dbdCaseFound ? 'Yes' : 'No'}</TableCell>
+                <TableCell>{inspection.needsBansos ? 'Yes' : 'No'}</TableCell>
+                <TableCell>{inspection.reviewNotes || '-'}</TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>
