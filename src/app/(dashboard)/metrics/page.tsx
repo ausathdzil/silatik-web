@@ -14,7 +14,7 @@ import {
   UsersRoundIcon,
   ZapIcon,
 } from 'lucide-react';
-import { PageHeader } from '../components/page-header';
+import { PageHeader } from '../page-header';
 import { DateRangePicker } from './date-picker';
 import { CaseInspectionRatioChart } from './metrics-charts';
 

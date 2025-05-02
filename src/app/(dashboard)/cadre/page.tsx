@@ -1,4 +1,4 @@
-import { PageHeader } from '../components/page-header';
+import { PageHeader } from '../page-header';
 import { RWTable } from './rw-table';
 
 export default function Cadre() {

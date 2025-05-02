@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDate } from '@/lib/utils';
+import { CaseReport } from '@/app/(dashboard)/(overview)/data/definitions';
 import {
   ColumnDef,
   flexRender,
@@ -31,109 +32,16 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-const caseReportData = [
+export const columns: ColumnDef<CaseReport>[] = [
   {
-    id: '01',
-    cadre: 'Ahmad Hidayat',
-    date: '2025-01-01',
-    time: '08:00',
-    address: 'Jl. Merdeka',
-    rtRw: '001/001',
-    larvaeDetected: 1,
-  },
-  {
-    id: '02',
-    cadre: 'Siti Rahayu',
-    date: '2025-01-02',
-    time: '13:15',
-    address: 'Jl. Veteran',
-    rtRw: '002/002',
-    larvaeDetected: 4,
-  },
-  {
-    id: '03',
-    cadre: 'Budi Santoso',
-    date: '2025-01-03',
-    time: '16:30',
-    address: 'Jl. Pahlawan',
-    rtRw: '003/003',
-    larvaeDetected: 2,
-  },
-  {
-    id: '04',
-    cadre: 'Dewi Kusuma',
-    date: '2025-01-04',
-    time: '14:30',
-    address: 'Jl. Diponegoro',
-    rtRw: '003/004',
-    larvaeDetected: 5,
-  },
-  {
-    id: '05',
-    cadre: 'Agus Setiawan',
-    date: '2025-01-05',
-    time: '09:15',
-    address: 'Jl. Sudirman',
-    rtRw: '005/006',
-    larvaeDetected: 1,
-  },
-  {
-    id: '06',
-    cadre: 'Rina Wulandari',
-    date: '2025-01-06',
-    time: '11:45',
-    address: 'Jl. Gatot Subroto',
-    rtRw: '007/008',
-    larvaeDetected: 4,
-  },
-  {
-    id: '07',
-    cadre: 'Joko Susilo',
-    date: '2025-01-07',
-    time: '15:20',
-    address: 'Jl. Thamrin',
-    rtRw: '009/010',
-    larvaeDetected: 3,
-  },
-  {
-    id: '08',
-    cadre: 'Maya Fitriani',
-    date: '2025-01-08',
-    time: '08:30',
-    address: 'Jl. Asia Afrika',
-    rtRw: '011/012',
-    larvaeDetected: 2,
-  },
-  {
-    id: '09',
-    cadre: 'Rudi Hartono',
-    date: '2025-01-09',
-    time: '13:00',
-    address: 'Jl. Braga',
-    rtRw: '013/014',
-    larvaeDetected: 6,
-  },
-  {
-    id: '10',
-    cadre: 'Lina Wijaya',
-    date: '2025-01-10',
-    time: '16:45',
-    address: 'Jl. Cihampelas',
-    rtRw: '015/016',
-    larvaeDetected: 1,
-  },
-];
-
-export const columns: ColumnDef<(typeof caseReportData)[0]>[] = [
-  {
-    accessorKey: 'id',
+    accessorKey: 'rwName',
     header: ({ column }) => {
       return (
         <button
           className="flex items-center gap-1 hover:text-primary [&_svg:not([class*='size-'])]:size-4"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          ID
+          RW
           {column.getIsSorted() === 'desc' ? (
             <ChevronDown />
           ) : column.getIsSorted() === 'asc' ? (
@@ -146,7 +54,27 @@ export const columns: ColumnDef<(typeof caseReportData)[0]>[] = [
     },
   },
   {
-    accessorKey: 'cadre',
+    accessorKey: 'rtName',
+    header: ({ column }) => {
+      return (
+        <button
+          className="flex items-center gap-1 hover:text-primary [&_svg:not([class*='size-'])]:size-4"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          RT
+          {column.getIsSorted() === 'desc' ? (
+            <ChevronDown />
+          ) : column.getIsSorted() === 'asc' ? (
+            <ChevronUp />
+          ) : (
+            <ChevronsUpDown />
+          )}
+        </button>
+      );
+    },
+  },
+  {
+    accessorKey: 'cadreName',
     header: 'Cadre',
   },
   {
@@ -155,26 +83,22 @@ export const columns: ColumnDef<(typeof caseReportData)[0]>[] = [
     cell: ({ row }) => formatDate(row.getValue('date')),
   },
   {
-    accessorKey: 'time',
+    accessorKey: 'hour',
     header: 'Time',
   },
   {
-    accessorKey: 'address',
+    accessorKey: 'householdAddress',
     header: 'Address',
   },
   {
-    accessorKey: 'rtRw',
-    header: 'RT/RW',
-  },
-  {
-    accessorKey: 'larvaeDetected',
+    accessorKey: 'larvaeCount',
     header: ({ column }) => {
       return (
         <button
           className="flex items-center gap-1 hover:text-primary [&_svg:not([class*='size-'])]:size-4"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Larvae Spots
+          Larvae Count
           {column.getIsSorted() === 'desc' ? (
             <ChevronDown />
           ) : column.getIsSorted() === 'asc' ? (
@@ -188,12 +112,16 @@ export const columns: ColumnDef<(typeof caseReportData)[0]>[] = [
   },
 ];
 
-export function CaseReportTable() {
+interface CaseReportTableProps {
+  data: CaseReport[] | null;
+}
+
+export function CaseReportTable({ data }: CaseReportTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
 
   const table = useReactTable({
-    data: caseReportData,
+    data: data || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -247,7 +175,16 @@ export function CaseReportTable() {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {!data ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  Loading...
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
@@ -275,7 +212,7 @@ export function CaseReportTable() {
       </div>
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          {table.getFilteredRowModel().rows.length} rows
+          {data ? table.getFilteredRowModel().rows.length : 0} rows
         </div>
         <div className="flex items-center gap-2">
           <Button

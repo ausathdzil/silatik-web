@@ -3,7 +3,7 @@
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEffect, useRef } from 'react';
-import { mockDengueData } from '../data/mock-dengue-data';
+import { mockDengueData } from '../(overview)/data/mock-dengue-data';
 
 export function AnalyticsMap() {
   const mapRef = useRef<mapboxgl.Map | null>(null);

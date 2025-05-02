@@ -16,7 +16,7 @@ import {
   MapIcon,
   ThermometerSunIcon,
 } from 'lucide-react';
-import { PageHeader } from '../components/page-header';
+import { PageHeader } from '../page-header';
 import { ActionPlan } from './action-plan';
 import { RiskIndicatorChart } from './analytics-charts';
 import { AnalyticsMap } from './analytics-map';

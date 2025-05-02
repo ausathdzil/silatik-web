@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEffect, useRef, useState } from 'react';
-import { mockDengueData } from '../data/mock-dengue-data';
+import { mockDengueData } from './data/mock-dengue-data';
 
 const INITIAL_CENTER = [106.79544, -6.30916] as [number, number];
 const INITIAL_ZOOM = 14.99;
