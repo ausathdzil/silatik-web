@@ -6,31 +6,56 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { Bar, BarChart, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { RiskIndicator } from './data/definitions';
 
-const riskData = [
-  { name: 'High Rainfall', value: 75, fill: 'hsl(var(--chart-1))' },
-  { name: 'Flood', value: 45, fill: 'hsl(var(--chart-2))' },
-];
+export function RiskIndicatorChart({
+  riskData,
+}: {
+  riskData: RiskIndicator[];
+}) {
+  const sortedData = [...riskData].sort((a, b) => b.riskLevel - a.riskLevel);
 
-const riskConfig = {
-  value: {
-    label: 'Risk Percentage',
-  },
-} satisfies ChartConfig;
+  const chartConfig = {
+    ...Object.fromEntries(
+      sortedData.map((item, index) => [
+        item.indicator,
+        { label: item.indicator, color: `hsl(var(--chart-${index + 1}))` },
+      ])
+    ),
+  } satisfies ChartConfig;
 
-export function RiskIndicatorChart() {
+  const chartData = sortedData.map((item, index) => ({
+    ...item,
+    fill: `hsl(var(--chart-${index + 1}))`,
+  }));
+
   return (
-    <ChartContainer config={riskConfig} className="size-[300px]">
-      <BarChart data={riskData} margin={{ left: 0 }}>
-        <XAxis type="category" dataKey="name" interval={0} />
-        <YAxis type="number" domain={[0, 100]} />
+    <ChartContainer config={chartConfig}>
+      <BarChart
+        accessibilityLayer
+        data={chartData}
+        layout="vertical"
+        margin={{
+          left: 28,
+          right: 28,
+        }}
+      >
+        <CartesianGrid horizontal={false} />
+        <YAxis
+          dataKey="indicator"
+          type="category"
+          tickLine={false}
+          tickMargin={10}
+          axisLine={false}
+        />
+        <XAxis dataKey="riskLevel" type="number" domain={[0, 5]} />
         <ChartTooltip
           cursor={false}
-          content={<ChartTooltipContent />}
-          formatter={(value: number) => `${value}%`}
+          content={<ChartTooltipContent nameKey="indicator" hideLabel />}
+          formatter={(value: number) => `Level ${value}`}
         />
-        <Bar dataKey="value" fill="fill" />
+        <Bar dataKey="riskLevel" layout="vertical" radius={5} />
       </BarChart>
     </ChartContainer>
   );

@@ -34,19 +34,11 @@ export default function Dashboard() {
           <DengueMap />
         </div>
         <div className="grid auto-rows-min gap-4 md:grid-cols-2">
-          <Suspense fallback={<Skeleton />}>
-            <DengueCaseCard />
-          </Suspense>
-          <Suspense fallback={<Skeleton />}>
-            <TypeDistributionCard />
-          </Suspense>
+          <DengueCaseCard />
+          <TypeDistributionCard />
         </div>
-        <Suspense fallback={<Skeleton />}>
-          <InsightCard />
-        </Suspense>
-        <Suspense fallback={<Skeleton />}>
-          <CaseReportCard />
-        </Suspense>
+        <InsightCard />
+        <CaseReportCard />
       </main>
     </>
   );

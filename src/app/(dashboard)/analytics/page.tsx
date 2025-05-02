@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
+  BanIcon,
   ChartColumnBigIcon,
   ChartNetworkIcon,
   CloudRainWindIcon,
@@ -20,8 +21,9 @@ import { PageHeader } from '../page-header';
 import { ActionPlan } from './action-plan';
 import { RiskIndicatorChart } from './analytics-charts';
 import { AnalyticsMap } from './analytics-map';
+import { getActionPlan, getWeatherInsights } from './data';
 
-export default function Analytics() {
+export default async function Analytics() {
   return (
     <>
       <PageHeader>Analytics</PageHeader>
@@ -31,7 +33,7 @@ export default function Analytics() {
           <TemperatureCard />
           <InspectionsCard />
         </div>
-        <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+        <div className="grid auto-rows-min gap-4 md:grid-cols-2">
           <SummaryMapCard />
           <RiskIndicatorCard />
         </div>
@@ -43,7 +45,9 @@ export default function Analytics() {
   );
 }
 
-function WeatherCard() {
+async function WeatherCard() {
+  const weatherInsights = await getWeatherInsights();
+
   return (
     <Card>
       <CardHeader className="flex items-center gap-2">
@@ -55,9 +59,8 @@ function WeatherCard() {
           <CloudRainWindIcon className="size-24 stroke-blue-300 " />
           <div className="flex flex-col font-medium">
             <span>Rainfall</span>
-            <span className="text-2xl font-bold">120 mm</span>
-            <span className="text-muted-foreground text-sm">
-              +10 mm from last week
+            <span className="text-2xl font-bold">
+              {weatherInsights?.weather.precip_mm} mm
             </span>
           </div>
         </div>
@@ -66,14 +69,16 @@ function WeatherCard() {
         <div className="flex items-center gap-1 text-muted-foreground text-sm">
           <DropletIcon className="size-4" />
           <span>Humidity:</span>
-          <span>70% (Last week: 60%, up 10%)</span>
+          <span>{weatherInsights?.weather.humidity}%</span>
         </div>
       </CardFooter>
     </Card>
   );
 }
 
-function TemperatureCard() {
+async function TemperatureCard() {
+  const weatherInsights = await getWeatherInsights();
+
   return (
     <Card>
       <CardHeader className="flex items-center gap-2">
@@ -85,9 +90,8 @@ function TemperatureCard() {
           <ThermometerSunIcon className="size-24 stroke-orange-300 " />
           <div className="flex flex-col font-medium">
             <span>Average Temperature</span>
-            <span className="text-2xl font-bold">30°C</span>
-            <span className="text-muted-foreground text-sm">
-              +2°C from last week
+            <span className="text-2xl font-bold">
+              {weatherInsights?.weather.temp_c}°C
             </span>
           </div>
         </div>
@@ -133,7 +137,7 @@ function InspectionsCard() {
 
 function SummaryMapCard() {
   return (
-    <Card className="col-span-2">
+    <Card>
       <CardHeader className="flex items-center gap-2">
         <MapIcon className="size-4" />
         <CardTitle>Risk Summary Map</CardTitle>
@@ -145,7 +149,9 @@ function SummaryMapCard() {
   );
 }
 
-function RiskIndicatorCard() {
+async function RiskIndicatorCard() {
+  const weatherInsights = await getWeatherInsights();
+
   return (
     <Card>
       <CardHeader className="flex items-center gap-2">
@@ -153,28 +159,10 @@ function RiskIndicatorCard() {
         <CardTitle>Risk Indicator</CardTitle>
       </CardHeader>
       <CardContent>
-        <RiskIndicatorChart />
+        <RiskIndicatorChart riskData={weatherInsights?.riskIndicators!} />
       </CardContent>
     </Card>
   );
-}
-
-async function getActionPlan() {
-  return {
-    objective:
-      'Reduce the positive rate of mosquito breeding sites by 20% within 1 month.',
-    targetedInterventions: [
-      'Intensify home visits by Jumantik cadres',
-      'Conduct fogging in hotspot areas',
-      'Launch community education campaigns',
-    ],
-    timeline: 'Next 3 Months',
-    resources: ['Larvicide', 'Fogging equipment', 'Personnel'],
-    monitoring: [
-      'Monitor the positive rate of mosquito breeding sites weekly',
-      'Conduct post-fogging larval surveys',
-    ],
-  };
 }
 
 async function ActionPlanCard() {
@@ -186,9 +174,23 @@ async function ActionPlanCard() {
         <LightbulbIcon className="size-4" />
         <CardTitle>Action Plan</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ActionPlan initialPlan={initialPlan} />
-      </CardContent>
+      {initialPlan ? (
+        <CardContent>
+          <ActionPlan initialPlan={initialPlan} />
+        </CardContent>
+      ) : (
+        <CardContent className="flex-1 flex flex-col items-center justify-center gap-4 py-8">
+          <div className="rounded-full bg-muted p-4">
+            <BanIcon className="size-8 text-muted-foreground" />
+          </div>
+          <div className="text-center">
+            <p className="font-medium">No Data Available</p>
+            <p className="text-sm text-muted-foreground">
+              Please check back later or contact support if the issue persists
+            </p>
+          </div>
+        </CardContent>
+      )}
     </Card>
   );
 }
