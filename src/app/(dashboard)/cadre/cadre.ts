@@ -22,7 +22,7 @@ export interface RT {
   riskLevel: string;
   homeReports: number;
   socialAssistance: string;
-  cadre: [Cadre, Cadre];
+  cadres: Cadre[];
   payrollPayment?: {
     paid: number;
     total: number;
@@ -46,12 +46,12 @@ export function calculateRTPayrollPayment(rt: RT): {
   paid: number;
   total: number;
 } {
-  const paidCount = rt.cadre.filter(
+  const paidCount = rt.cadres.filter(
     (cadre) => cadre.wageStatus === 'paid'
   ).length;
   return {
     paid: paidCount,
-    total: rt.cadre.length, // This will always be 2
+    total: rt.cadres.length, // This will always be 2
   };
 }
 
