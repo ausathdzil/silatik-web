@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   BanIcon,
   ChartColumnBigIcon,
@@ -17,6 +18,7 @@ import {
   MapIcon,
   ThermometerSunIcon,
 } from 'lucide-react';
+import { Suspense } from 'react';
 import { PageHeader } from '../page-header';
 import { ActionPlan } from './action-plan';
 import { RiskIndicatorChart } from './analytics-charts';
@@ -29,16 +31,28 @@ export default async function Analytics() {
       <PageHeader>Analytics</PageHeader>
       <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
         <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-          <WeatherCard />
-          <TemperatureCard />
-          <InspectionsCard />
+          <Suspense fallback={<Skeleton />}>
+            <WeatherCard />
+          </Suspense>
+          <Suspense fallback={<Skeleton />}>
+            <TemperatureCard />
+          </Suspense>
+          <Suspense fallback={<Skeleton />}>
+            <InspectionsCard />
+          </Suspense>
         </div>
         <div className="grid auto-rows-min gap-4 md:grid-cols-2">
-          <SummaryMapCard />
-          <RiskIndicatorCard />
+          <Suspense fallback={<Skeleton />}>
+            <SummaryMapCard />
+          </Suspense>
+          <Suspense fallback={<Skeleton className="min-h-[50vh]" />}>
+            <RiskIndicatorCard />
+          </Suspense>
         </div>
         <div className="min-h-[50vh]">
-          <ActionPlanCard />
+          <Suspense fallback={<Skeleton className="min-h-[50vh]" />}>
+            <ActionPlanCard />
+          </Suspense>
         </div>
       </main>
     </>

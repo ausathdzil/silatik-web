@@ -1,7 +1,7 @@
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { Loader } from 'lucide-react';
-import { Suspense } from 'react';
 import { DashboardSidebar } from './dashboard-sidebar';
+
+export const dynamic = 'force-dynamic';
 
 export default function DashboardLayout({
   children,
@@ -9,11 +9,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <DashboardSidebar />
-      <SidebarInset>
-        <Suspense fallback={<Loader className="animate-spin" />}>
-          {children}
-        </Suspense>
-      </SidebarInset>
+      <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   );
 }

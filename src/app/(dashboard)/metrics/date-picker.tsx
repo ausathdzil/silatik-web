@@ -13,14 +13,19 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 
 export function DateRangePicker({
   className,
 }: React.HTMLAttributes<HTMLDivElement>) {
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: subWeeks(new Date(), 4),
-    to: new Date(),
-  });
+  const [date, setDate] = useState<DateRange | undefined>();
+
+  useEffect(() => {
+    setDate({
+      from: subWeeks(new Date(), 4),
+      to: new Date(),
+    });
+  }, []);
 
   const handleDateSelect = (selectedDate: DateRange | undefined) => {
     if (!selectedDate?.from || !selectedDate?.to) {

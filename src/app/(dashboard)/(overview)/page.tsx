@@ -22,6 +22,8 @@ import { PageHeader } from '../page-header';
 import { CaseReportTable } from './case-report-table';
 import { DengueCaseChart, TypeDistributionChart } from './dashboard-charts';
 import { DengueMap } from './dengue-map';
+import { Suspense } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Dashboard() {
   return (
@@ -32,11 +34,19 @@ export default function Dashboard() {
           <DengueMap />
         </div>
         <div className="grid auto-rows-min gap-4 md:grid-cols-2">
-          <DengueCaseCard />
-          <TypeDistributionCard />
+          <Suspense fallback={<Skeleton />}>
+            <DengueCaseCard />
+          </Suspense>
+          <Suspense fallback={<Skeleton />}>
+            <TypeDistributionCard />
+          </Suspense>
         </div>
-        <InsightCard />
-        <CaseReportCard />
+        <Suspense fallback={<Skeleton />}>
+          <InsightCard />
+        </Suspense>
+        <Suspense fallback={<Skeleton />}>
+          <CaseReportCard />
+        </Suspense>
       </main>
     </>
   );
