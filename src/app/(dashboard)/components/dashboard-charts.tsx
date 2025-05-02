@@ -26,6 +26,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
+import { BoxIcon, MapPinnedIcon } from 'lucide-react';
 
 const caseChartData = [
   { rw: 'RW 01', case: 12, fill: 'hsl(var(--chart-1))' },
@@ -60,9 +61,10 @@ export function DengueCaseChart() {
   return (
     <Card className="flex flex-col">
       <CardHeader className="pb-0">
-        <CardTitle className="text-center">
-          Dengue Fever Case Distribution
-        </CardTitle>
+        <div className="flex items-center justify-center gap-2">
+          <MapPinnedIcon />
+          <CardTitle>Case Distribution by RW</CardTitle>
+        </div>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -142,7 +144,10 @@ export function TypeDistributionChart() {
   return (
     <Card className="flex flex-col">
       <CardHeader className="pb-0">
-        <CardTitle className="text-center">Case Distribution by Type</CardTitle>
+        <div className="flex items-center justify-center gap-2">
+          <BoxIcon />
+          <CardTitle>Case Distribution by Type</CardTitle>
+        </div>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer config={typeChartConfig}>

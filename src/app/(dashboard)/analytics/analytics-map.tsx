@@ -1,19 +1,13 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { mockDengueData } from '../data/mock-dengue-data';
 
-export function DengueMap() {
+export function AnalyticsMap() {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const [coordinates, setCoordinates] = useState({
-    lng: 106.79544,
-    lat: -6.30916,
-    zoom: 14.99,
-  });
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -22,21 +16,13 @@ export function DengueMap() {
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      center: [coordinates.lng, coordinates.lat],
-      zoom: coordinates.zoom,
+      center: [106.79544, -6.30916],
+      zoom: 14.99,
       style: 'mapbox://styles/mapbox/dark-v11',
+      interactive: false, // Disable all map interactions
     });
 
     mapRef.current = map;
-
-    map.on('move', () => {
-      const { lng, lat } = map.getCenter();
-      setCoordinates({
-        lng: Number(lng.toFixed(4)),
-        lat: Number(lat.toFixed(4)),
-        zoom: Number(map.getZoom().toFixed(2)),
-      });
-    });
 
     map.on('load', () => {
       map.addSource('dengue-cases', {
@@ -138,14 +124,6 @@ export function DengueMap() {
 
     resizeObserver.observe(mapContainerRef.current);
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        const { longitude, latitude } = position.coords;
-        map.setCenter([longitude, latitude]);
-        map.setZoom(14);
-      });
-    }
-
     return () => {
       if (mapRef.current) {
         mapRef.current.remove();
@@ -155,30 +133,11 @@ export function DengueMap() {
     };
   }, []);
 
-  const handleResetZoom = () => {
-    if (mapRef.current) {
-      mapRef.current.setCenter([106.79544, -6.30916]);
-      mapRef.current.setZoom(14.99);
-    }
-  };
-
   return (
-    <div className="relative size-full">
-      <div
-        id="map-container"
-        className="size-full rounded-xl"
-        ref={mapContainerRef}
-      />
-      <div className="absolute top-4 left-4 bg-white/90 p-2 rounded-lg shadow-lg w-[200px]">
-        <div className="text-sm text-gray-700 font-mono">
-          <div>Longitude: {coordinates.lng}</div>
-          <div>Latitude: {coordinates.lat}</div>
-          <div>Zoom: {coordinates.zoom}</div>
-        </div>
-        <Button onClick={handleResetZoom} size="sm" className="mt-2 w-full">
-          Reset View
-        </Button>
-      </div>
-    </div>
+    <div
+      id="map-container"
+      className="size-full rounded-md"
+      ref={mapContainerRef}
+    />
   );
 }

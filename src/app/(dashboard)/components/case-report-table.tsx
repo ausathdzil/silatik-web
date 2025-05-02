@@ -216,7 +216,7 @@ export function CaseReportTable() {
     <div className="space-y-4">
       <div className="relative max-w-sm">
         <Input
-          className="peer ps-9 pe-9"
+          className="peer ps-9"
           placeholder="Search cadre..."
           type="search"
           value={globalFilter ?? ''}
