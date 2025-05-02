@@ -20,24 +20,31 @@ export interface Cadre {
 export interface RT {
   rt: string;
   riskLevel: string;
-  homeReports: number;
-  socialAssistance: string;
   cadres: Cadre[];
   payrollPayment?: {
     paid: number;
+    total: number;
+  };
+  homeReports?: {
+    total: number;
+  };
+  socialAssistance?: {
     total: number;
   };
 }
 
 export interface RW {
   rw: string;
-  pic: string;
   riskLevel: string;
-  homeReports: number;
-  socialAssistance: string;
   rtData?: RT[];
   payrollPayment?: {
     paid: number;
+    total: number;
+  };
+  homeReports?: {
+    total: number;
+  };
+  socialAssistance?: {
     total: number;
   };
 }
@@ -84,5 +91,61 @@ export function updateRWPayrollPayment(rw: RW): RW {
   return {
     ...rw,
     payrollPayment: calculateRWPayrollPayment(rw),
+  };
+}
+
+export function calculateRTHomeReports(rt: RT): number {
+  return rt.cadres.reduce((total, cadre) => {
+    return total + (cadre.inspection?.length || 0);
+  }, 0);
+}
+
+export function calculateRTSocialAssistance(rt: RT): number {
+  return rt.cadres.reduce((total, cadre) => {
+    return (
+      total +
+      (cadre.inspection?.filter((inspection) => inspection.socialAssistance)
+        .length || 0)
+    );
+  }, 0);
+}
+
+export function calculateRWHomeReports(rw: RW): number {
+  if (!rw.rtData) return 0;
+  return rw.rtData.reduce((total, rt) => {
+    return total + calculateRTHomeReports(rt);
+  }, 0);
+}
+
+export function calculateRWSocialAssistance(rw: RW): number {
+  if (!rw.rtData) return 0;
+  return rw.rtData.reduce((total, rt) => {
+    return total + calculateRTSocialAssistance(rt);
+  }, 0);
+}
+
+// Helper function to update home reports and social assistance for an RT
+export function updateRTStats(rt: RT): RT {
+  return {
+    ...rt,
+    homeReports: {
+      total: calculateRTHomeReports(rt),
+    },
+    socialAssistance: {
+      total: calculateRTSocialAssistance(rt),
+    },
+  };
+}
+
+// Helper function to update home reports and social assistance for an RW
+export function updateRWStats(rw: RW): RW {
+  return {
+    ...rw,
+    homeReports: {
+      total: calculateRWHomeReports(rw),
+    },
+    socialAssistance: {
+      total: calculateRWSocialAssistance(rw),
+    },
   };
 }

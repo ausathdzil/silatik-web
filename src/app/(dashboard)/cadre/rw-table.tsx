@@ -20,6 +20,7 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
+  FilterFn,
 } from '@tanstack/react-table';
 import {
   BanknoteArrowUpIcon,
@@ -32,9 +33,15 @@ import {
   SearchIcon,
 } from 'lucide-react';
 import React, { useState } from 'react';
-import { calculateRWPayrollPayment, RW } from './cadre';
+import {
+  calculateRWPayrollPayment,
+  calculateRWHomeReports,
+  calculateRWSocialAssistance,
+  RW,
+} from './cadre';
 import { RTTable } from './rt-table';
 import { rwData } from './cadre-mock-data';
+import { AddCadre } from './add-cadre';
 
 export const riskLevelColors = {
   safe: { bg: 'bg-green-100', text: 'text-green-800', number: 1 },
@@ -66,10 +73,6 @@ export const columns: ColumnDef<(typeof rwData)[0]>[] = [
     },
   },
   {
-    accessorKey: 'pic',
-    header: 'Coordinator (PIC)',
-  },
-  {
     accessorKey: 'homeReports',
     header: ({ column }) => {
       return (
@@ -87,6 +90,11 @@ export const columns: ColumnDef<(typeof rwData)[0]>[] = [
           )}
         </button>
       );
+    },
+    cell: ({ row }) => {
+      const rw = row.original;
+      const total = calculateRWHomeReports(rw);
+      return total;
     },
   },
   {
@@ -131,8 +139,9 @@ export const columns: ColumnDef<(typeof rwData)[0]>[] = [
       );
     },
     cell: ({ row }) => {
-      const value = row.getValue('socialAssistance') as string;
-      return `${value} House${value !== '1' ? 's' : ''}`;
+      const rw = row.original;
+      const total = calculateRWSocialAssistance(rw);
+      return `${total} House${total !== 1 ? 's' : ''}`;
     },
   },
   {
@@ -177,6 +186,10 @@ export function RWTable() {
     setExpandedRows(newExpandedRows);
   };
 
+  const rwFilter: FilterFn<RW> = (row, columnId, filterValue) => {
+    return row.original.rw.toLowerCase().includes(filterValue.toLowerCase());
+  };
+
   const table = useReactTable({
     data: rwData,
     columns,
@@ -195,6 +208,7 @@ export function RWTable() {
         pageSize: 5,
       },
     },
+    globalFilterFn: rwFilter,
   });
 
   return (
@@ -203,7 +217,7 @@ export function RWTable() {
         <div className="relative w-sm">
           <Input
             className="peer ps-9"
-            placeholder="Search coordinator..."
+            placeholder="Search RW..."
             type="search"
             value={globalFilter ?? ''}
             onChange={(event) => setGlobalFilter(event.target.value)}
@@ -213,10 +227,7 @@ export function RWTable() {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <Button variant="outline">
-            <PlusIcon />
-            Add Cadre
-          </Button>
+          <AddCadre />
           <Button>
             <BanknoteArrowUpIcon />
             Process Payroll

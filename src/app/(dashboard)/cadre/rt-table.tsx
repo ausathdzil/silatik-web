@@ -1,3 +1,5 @@
+'use client';
+
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Card,
@@ -23,8 +25,29 @@ import {
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { CheckCircleIcon, CircleIcon, XCircleIcon } from 'lucide-react';
-import { Cadre, calculateRTPayrollPayment, RT } from './cadre';
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
+} from '@tanstack/react-table';
+import {
+  CheckCircleIcon,
+  ChevronDown,
+  ChevronsUpDown,
+  ChevronUp,
+  CircleIcon,
+  XCircleIcon,
+} from 'lucide-react';
+import { useState } from 'react';
+import {
+  Cadre,
+  calculateRTHomeReports,
+  calculateRTSocialAssistance,
+  RT,
+} from './cadre';
 import { riskLevelColors } from './rw-table';
 
 type RiskLevel = keyof typeof riskLevelColors;
@@ -34,48 +57,148 @@ interface RTTableProps {
 }
 
 export function RTTable({ rtData }: RTTableProps) {
+  const [sorting, setSorting] = useState<SortingState>([]);
+
+  const columns: ColumnDef<RT>[] = [
+    {
+      accessorKey: 'rt',
+      header: ({ column }) => {
+        return (
+          <button
+            className="flex items-center gap-1 hover:text-primary [&_svg:not([class*='size-'])]:size-4"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            RT
+            {column.getIsSorted() === 'desc' ? (
+              <ChevronDown />
+            ) : column.getIsSorted() === 'asc' ? (
+              <ChevronUp />
+            ) : (
+              <ChevronsUpDown />
+            )}
+          </button>
+        );
+      },
+    },
+    {
+      accessorKey: 'homeReports',
+      header: ({ column }) => {
+        return (
+          <button
+            className="flex items-center gap-1 hover:text-primary [&_svg:not([class*='size-'])]:size-4"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Home Reports (&lt; 30 days)
+            {column.getIsSorted() === 'desc' ? (
+              <ChevronDown />
+            ) : column.getIsSorted() === 'asc' ? (
+              <ChevronUp />
+            ) : (
+              <ChevronsUpDown />
+            )}
+          </button>
+        );
+      },
+      cell: ({ row }) => {
+        const rt = row.original;
+        const total = calculateRTHomeReports(rt);
+        return total;
+      },
+    },
+    {
+      accessorKey: 'riskLevel',
+      header: 'Risk Level (< 30 days)',
+      cell: ({ row }) => {
+        const level = row.getValue('riskLevel') as RiskLevel;
+        const { bg, text, number } = riskLevelColors[level];
+        return (
+          <div className="flex items-center gap-2">
+            <div
+              className={cn(
+                'flex size-6 items-center justify-center rounded-full font-medium',
+                bg,
+                text
+              )}
+            >
+              {number}
+            </div>
+            <span className="capitalize">{level}</span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'socialAssistance',
+      header: ({ column }) => {
+        return (
+          <button
+            className="flex items-center gap-1 hover:text-primary [&_svg:not([class*='size-'])]:size-4"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Social Assistance Needed
+            {column.getIsSorted() === 'desc' ? (
+              <ChevronDown />
+            ) : column.getIsSorted() === 'asc' ? (
+              <ChevronUp />
+            ) : (
+              <ChevronsUpDown />
+            )}
+          </button>
+        );
+      },
+      cell: ({ row }) => {
+        const rt = row.original;
+        const total = calculateRTSocialAssistance(rt);
+        return `${total} House${total !== 1 ? 's' : ''}`;
+      },
+    },
+  ];
+
+  const table = useReactTable({
+    data: rtData,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      sorting,
+    },
+  });
+
   return (
     <div className="border tabular-nums">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead>RT</TableHead>
-            <TableHead>Home Reports</TableHead>
-            <TableHead>Risk Level</TableHead>
-            <TableHead>Social Assistance</TableHead>
-            <TableHead>Payroll Payment</TableHead>
-          </TableRow>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
         </TableHeader>
         <TableBody>
-          {rtData.map((rt) => {
-            const payrollPayment = calculateRTPayrollPayment(rt);
+          {table.getRowModel().rows.map((row) => {
+            const rt = row.original;
             return (
               <Drawer key={rt.rt}>
                 <DrawerTrigger asChild>
                   <TableRow>
-                    <TableCell>{rt.rt}</TableCell>
-                    <TableCell>{rt.homeReports}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={cn(
-                            'flex size-6 items-center justify-center rounded-full font-medium',
-                            riskLevelColors[rt.riskLevel as RiskLevel].bg,
-                            riskLevelColors[rt.riskLevel as RiskLevel].text
-                          )}
-                        >
-                          {riskLevelColors[rt.riskLevel as RiskLevel].number}
-                        </div>
-                        <span className="capitalize">{rt.riskLevel}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {rt.socialAssistance} House
-                      {rt.socialAssistance !== '1' ? 's' : ''}
-                    </TableCell>
-                    <TableCell>
-                      {payrollPayment.paid}/{payrollPayment.total}
-                    </TableCell>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
                   </TableRow>
                 </DrawerTrigger>
                 <CadreDrawer cadres={rt.cadres} />
@@ -100,24 +223,26 @@ function CadreDrawer({ cadres }: { cadres: Cadre[] }) {
             <CadreCard key={cadre.name} cadre={cadre} />
           ))}
         </div>
-      </div>
 
-      <div className="p-4 w-full max-w-3/4 mx-auto">
-        <Tabs defaultValue={cadres[0].name}>
-          <TabsList>
-            {cadres.map((cadre) => (
-              <TabsTrigger key={cadre.name} value={cadre.name}>
-                {cadre.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          <TabsContent value={cadres[0].name}>
-            <CadreInspection cadre={cadres[0]} />
-          </TabsContent>
-          <TabsContent value={cadres[1].name}>
-            <CadreInspection cadre={cadres[1]} />
-          </TabsContent>
-        </Tabs>
+        <h2 className="text-sm font-medium text-center mt-4">Inspections</h2>
+
+        <div className="p-4 w-full max-w-3/4 mx-auto">
+          <Tabs defaultValue={cadres[0].name}>
+            <TabsList className="w-full justify-center">
+              {cadres.map((cadre) => (
+                <TabsTrigger key={cadre.name} value={cadre.name}>
+                  {cadre.name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            <TabsContent value={cadres[0].name}>
+              <CadreInspectionTable cadre={cadres[0]} />
+            </TabsContent>
+            <TabsContent value={cadres[1].name}>
+              <CadreInspectionTable cadre={cadres[1]} />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </DrawerContent>
   );
@@ -174,7 +299,7 @@ function CadreCard({ cadre }: { cadre: Cadre }) {
   );
 }
 
-function CadreInspection({ cadre }: { cadre: Cadre }) {
+function CadreInspectionTable({ cadre }: { cadre: Cadre }) {
   return (
     <div className="overflow-hidden rounded-lg border">
       <Table>
