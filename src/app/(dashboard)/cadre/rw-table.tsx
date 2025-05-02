@@ -13,6 +13,7 @@ import {
 import { cn } from '@/lib/utils';
 import {
   ColumnDef,
+  FilterFn,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -20,7 +21,6 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
-  FilterFn,
 } from '@tanstack/react-table';
 import {
   BanknoteArrowUpIcon,
@@ -29,19 +29,18 @@ import {
   ChevronRight,
   ChevronsUpDown,
   ChevronUp,
-  PlusIcon,
   SearchIcon,
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { AddCadre } from './add-cadre';
 import {
-  calculateRWPayrollPayment,
   calculateRWHomeReports,
+  calculateRWPayrollPayment,
   calculateRWSocialAssistance,
   RW,
 } from './cadre';
-import { RTTable } from './rt-table';
 import { rwData } from './cadre-mock-data';
-import { AddCadre } from './add-cadre';
+import { RTTable } from './rt-table';
 
 export const riskLevelColors = {
   safe: { bg: 'bg-green-100', text: 'text-green-800', number: 1 },

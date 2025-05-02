@@ -22,9 +22,9 @@ export function DengueMap() {
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      center: [coordinates.lng, coordinates.lat],
-      zoom: coordinates.zoom,
       style: 'mapbox://styles/mapbox/dark-v11',
+      center: [106.79544, -6.30916],
+      zoom: 14.99,
     });
 
     mapRef.current = map;
@@ -154,6 +154,13 @@ export function DengueMap() {
       resizeObserver.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.setCenter([coordinates.lng, coordinates.lat]);
+      mapRef.current.setZoom(coordinates.zoom);
+    }
+  }, [coordinates.lat, coordinates.lng, coordinates.zoom]);
 
   const handleResetZoom = () => {
     if (mapRef.current) {
