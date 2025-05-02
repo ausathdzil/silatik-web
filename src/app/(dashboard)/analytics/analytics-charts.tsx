@@ -19,7 +19,7 @@ const riskConfig = {
   },
 } satisfies ChartConfig;
 
-export default function AnalyticsChart() {
+export function RiskIndicatorChart() {
   return (
     <ChartContainer config={riskConfig} className="size-[300px]">
       <BarChart data={riskData} margin={{ left: 0 }}>

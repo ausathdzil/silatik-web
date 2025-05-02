@@ -17,9 +17,9 @@ import {
   ThermometerSunIcon,
 } from 'lucide-react';
 import { PageHeader } from '../components/page-header';
-import AnalyticsChart from './analytics-charts';
-import { AnalyticsMap } from './analytics-map';
 import { ActionPlan } from './action-plan';
+import { RiskIndicatorChart } from './analytics-charts';
+import { AnalyticsMap } from './analytics-map';
 
 export default function Analytics() {
   return (
@@ -153,7 +153,7 @@ function RiskIndicatorCard() {
         <CardTitle>Risk Indicator</CardTitle>
       </CardHeader>
       <CardContent>
-        <AnalyticsChart />
+        <RiskIndicatorChart />
       </CardContent>
     </Card>
   );
