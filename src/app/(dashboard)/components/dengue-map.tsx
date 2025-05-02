@@ -6,14 +6,25 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEffect, useRef, useState } from 'react';
 import { mockDengueData } from '../data/mock-dengue-data';
 
+const INITIAL_CENTER = [106.79544, -6.30916] as [number, number];
+const INITIAL_ZOOM = 14.99;
+const MAPBOX_STYLE = 'mapbox://styles/mapbox/dark-v11';
+
 export function DengueMap() {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const [coordinates, setCoordinates] = useState({
-    lng: 106.79544,
-    lat: -6.30916,
-    zoom: 14.99,
-  });
+  const [center, setCenter] = useState(INITIAL_CENTER);
+  const [zoom, setZoom] = useState(INITIAL_ZOOM);
+
+  const handleResetZoom = () => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    map.flyTo({
+      center: INITIAL_CENTER,
+      zoom: INITIAL_ZOOM,
+    });
+  };
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -22,20 +33,19 @@ export function DengueMap() {
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
-      center: [106.79544, -6.30916],
-      zoom: 14.99,
+      style: MAPBOX_STYLE,
+      center: INITIAL_CENTER,
+      zoom: INITIAL_ZOOM,
     });
 
     mapRef.current = map;
 
     map.on('move', () => {
-      const { lng, lat } = map.getCenter();
-      setCoordinates({
-        lng: Number(lng.toFixed(4)),
-        lat: Number(lat.toFixed(4)),
-        zoom: Number(map.getZoom().toFixed(2)),
-      });
+      const mapCenter = map.getCenter();
+      const mapZoom = map.getZoom();
+
+      setCenter([mapCenter.lng, mapCenter.lat]);
+      setZoom(mapZoom);
     });
 
     map.on('load', () => {
@@ -138,36 +148,12 @@ export function DengueMap() {
 
     resizeObserver.observe(mapContainerRef.current);
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        const { longitude, latitude } = position.coords;
-        map.setCenter([longitude, latitude]);
-        map.setZoom(14);
-      });
-    }
-
     return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
+      map.remove();
+      mapRef.current = null;
       resizeObserver.disconnect();
     };
   }, []);
-
-  useEffect(() => {
-    if (mapRef.current) {
-      mapRef.current.setCenter([coordinates.lng, coordinates.lat]);
-      mapRef.current.setZoom(coordinates.zoom);
-    }
-  }, [coordinates.lat, coordinates.lng, coordinates.zoom]);
-
-  const handleResetZoom = () => {
-    if (mapRef.current) {
-      mapRef.current.setCenter([106.79544, -6.30916]);
-      mapRef.current.setZoom(14.99);
-    }
-  };
 
   return (
     <div className="relative size-full">
@@ -178,9 +164,9 @@ export function DengueMap() {
       />
       <div className="absolute top-4 left-4 bg-white/90 p-2 rounded-lg shadow-lg w-[200px]">
         <div className="text-sm text-gray-700 font-mono">
-          <div>Longitude: {coordinates.lng}</div>
-          <div>Latitude: {coordinates.lat}</div>
-          <div>Zoom: {coordinates.zoom}</div>
+          <div>Longitude: {center[0].toFixed(4)}</div>
+          <div>Latitude: {center[1].toFixed(4)}</div>
+          <div>Zoom: {zoom.toFixed(2)}</div>
         </div>
         <Button onClick={handleResetZoom} size="sm" className="mt-2 w-full">
           Reset View
