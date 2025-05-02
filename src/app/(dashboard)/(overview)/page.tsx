@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   BanIcon,
   BoxIcon,
@@ -19,11 +18,10 @@ import {
   LightbulbIcon,
   MapPinnedIcon,
 } from 'lucide-react';
-import { Suspense } from 'react';
+import { PageHeader } from '../page-header';
 import { CaseReportTable } from './case-report-table';
 import { DengueCaseChart, TypeDistributionChart } from './dashboard-charts';
 import { DengueMap } from './dengue-map';
-import { PageHeader } from '../page-header';
 
 export default function Dashboard() {
   return (

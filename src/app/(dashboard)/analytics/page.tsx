@@ -151,6 +151,7 @@ function SummaryMapCard() {
 
 async function RiskIndicatorCard() {
   const weatherInsights = await getWeatherInsights();
+  const riskIndicators = weatherInsights?.riskIndicators;
 
   return (
     <Card>
@@ -159,7 +160,7 @@ async function RiskIndicatorCard() {
         <CardTitle>Risk Indicator</CardTitle>
       </CardHeader>
       <CardContent>
-        <RiskIndicatorChart riskData={weatherInsights?.riskIndicators!} />
+        <RiskIndicatorChart riskData={riskIndicators ?? []} />
       </CardContent>
     </Card>
   );
