@@ -28,36 +28,31 @@ import {
 } from '@/components/ui/chart';
 
 const caseChartData = [
-  { neighborhood: 'pondokLabu', case: 12, fill: 'var(--color-pondokLabu)' },
-  { neighborhood: 'cilandak', case: 8, fill: 'var(--color-cilandak)' },
-  { neighborhood: 'cipete', case: 6, fill: 'var(--color-cipete)' },
-  { neighborhood: 'fatmawati', case: 5, fill: 'var(--color-fatmawati)' },
-  { neighborhood: 'lebakBulus', case: 4, fill: 'var(--color-lebakBulus)' },
+  { rw: 'RW 01', case: 12, fill: 'hsl(var(--chart-1))' },
+  { rw: 'RW 02', case: 8, fill: 'hsl(var(--chart-2))' },
+  { rw: 'RW 03', case: 6, fill: 'hsl(var(--chart-3))' },
+  { rw: 'RW 04', case: 5, fill: 'hsl(var(--chart-4))' },
+  { rw: 'RW 05', case: 4, fill: 'hsl(var(--chart-5))' },
 ];
 
 const caseChartConfig = {
   case: {
     label: 'Case',
   },
-  pondokLabu: {
-    label: 'Pondok Labu',
-    color: 'hsl(var(--chart-1))',
+  'RW 01': {
+    label: 'RW 01',
   },
-  cilandak: {
-    label: 'Cilandak',
-    color: 'hsl(var(--chart-2))',
+  'RW 02': {
+    label: 'RW 02',
   },
-  cipete: {
-    label: 'Cipete',
-    color: 'hsl(var(--chart-3))',
+  'RW 03': {
+    label: 'RW 03',
   },
-  fatmawati: {
-    label: 'Fatmawati',
-    color: 'hsl(var(--chart-4))',
+  'RW 04': {
+    label: 'RW 04',
   },
-  lebakBulus: {
-    label: 'Lebak Bulus',
-    color: 'hsl(var(--chart-5))',
+  'RW 05': {
+    label: 'RW 05',
   },
 } satisfies ChartConfig;
 
@@ -77,20 +72,22 @@ export function DengueCaseChart() {
           <PieChart>
             <ChartTooltip
               content={
-                <ChartTooltipContent
-                  nameKey="neighborhood"
-                  className="min-w-[150px]"
-                />
+                <ChartTooltipContent nameKey="rw" className="min-w-[150px]" />
               }
             />
-            <ChartLegend
-              content={<ChartLegendContent nameKey="neighborhood" />}
-            />
+            <ChartLegend content={<ChartLegendContent nameKey="rw" />} />
             <Pie
               data={caseChartData}
               dataKey="case"
-              label
-              nameKey="neighborhood"
+              label={({ rw, case: caseCount }) => {
+                const total = caseChartData.reduce(
+                  (sum, item) => sum + item.case,
+                  0
+                );
+                const percentage = ((caseCount / total) * 100).toFixed(1);
+                return `${rw}: ${caseCount} (${percentage}%)`;
+              }}
+              nameKey="rw"
             />
           </PieChart>
         </ChartContainer>
