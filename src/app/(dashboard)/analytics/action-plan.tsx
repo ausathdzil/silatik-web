@@ -127,7 +127,7 @@ export function ActionPlan({ initialPlan }: { initialPlan: ActionPlan }) {
           </li>
         </ol>
 
-        <div className="flex gap-2 my-6">
+        <div className="flex gap-4 my-6">
           <Button variant="outline" onClick={() => setIsEditing(true)}>
             <EditIcon />
             Edit Plan
