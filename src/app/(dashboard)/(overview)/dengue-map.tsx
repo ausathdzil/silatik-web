@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { FeatureCollection, Point } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Household } from '../cadre/data/definitions';
 
 const INITIAL_CENTER = [107.61706, -6.89135] as [number, number];
@@ -17,6 +17,26 @@ export function DengueMap({ households }: { households: Household[] }) {
   const [center, setCenter] = useState(INITIAL_CENTER);
   const [zoom, setZoom] = useState(INITIAL_ZOOM);
 
+  const dengueData = useMemo<FeatureCollection<Point, { severity: number }>>(
+    () => ({
+      type: 'FeatureCollection',
+      features: households.map((household) => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [
+            parseFloat(household.longitude),
+            parseFloat(household.latitude),
+          ],
+        },
+        properties: {
+          severity: parseInt(household.intensity),
+        },
+      })),
+    }),
+    [households]
+  );
+
   const handleResetZoom = () => {
     const map = mapRef.current;
     if (!map) return;
@@ -25,23 +45,6 @@ export function DengueMap({ households }: { households: Household[] }) {
       center: INITIAL_CENTER,
       zoom: INITIAL_ZOOM,
     });
-  };
-
-  const dengueData: FeatureCollection<Point, { severity: number }> = {
-    type: 'FeatureCollection',
-    features: households.map((household) => ({
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [
-          parseFloat(household.longitude),
-          parseFloat(household.latitude),
-        ],
-      },
-      properties: {
-        severity: parseInt(household.intensity),
-      },
-    })),
   };
 
   useEffect(() => {
@@ -171,7 +174,7 @@ export function DengueMap({ households }: { households: Household[] }) {
       mapRef.current = null;
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [dengueData]);
 
   return (
     <div className="relative size-full">

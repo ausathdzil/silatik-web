@@ -3,7 +3,7 @@
 import { FeatureCollection, Point } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Household } from '../cadre/data/definitions';
 
 const INITIAL_CENTER = [107.61706, -6.89135] as [number, number];
@@ -14,22 +14,25 @@ export function AnalyticsMap({ households }: { households: Household[] }) {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const dengueData: FeatureCollection<Point, { severity: number }> = {
-    type: 'FeatureCollection',
-    features: households.map((household) => ({
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [
-          parseFloat(household.longitude),
-          parseFloat(household.latitude),
-        ],
-      },
-      properties: {
-        severity: parseInt(household.intensity),
-      },
-    })),
-  };
+  const dengueData = useMemo<FeatureCollection<Point, { severity: number }>>(
+    () => ({
+      type: 'FeatureCollection',
+      features: households.map((household) => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [
+            parseFloat(household.longitude),
+            parseFloat(household.latitude),
+          ],
+        },
+        properties: {
+          severity: parseInt(household.intensity),
+        },
+      })),
+    }),
+    [households]
+  );
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -153,7 +156,7 @@ export function AnalyticsMap({ households }: { households: Household[] }) {
       }
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [dengueData]);
 
   return (
     <div
