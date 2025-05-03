@@ -31,20 +31,20 @@ export function DengueCaseChart({ larvaeByRW }: { larvaeByRW: LarvaeByRW[] }) {
       color: 'hsl(var(--chart-1))',
     },
     ...Object.fromEntries(
-      larvaeByRW.map((item) => [
+      larvaeByRW.map((item, index) => [
         item.rwName,
         {
           label: item.rwName,
-          color: 'hsl(var(--chart-1))',
+          color: `hsl(var(--chart-${index + 1}))`,
         },
       ])
     ),
   } satisfies ChartConfig;
 
-  const chartData = larvaeByRW.map((item) => ({
+  const chartData = larvaeByRW.map((item, index) => ({
     ...item,
     larvaeCount: parseInt(item.larvaeCount),
-    fill: 'hsl(var(--chart-1))',
+    fill: `hsl(var(--chart-${index + 1}))`,
   }));
 
   const nonZeroData = chartData.filter((item) => item.larvaeCount > 0);

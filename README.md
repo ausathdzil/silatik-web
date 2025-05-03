@@ -1,4 +1,3 @@
-
 # Silatik Web
 
 Client website for Silatik platform
@@ -10,7 +9,8 @@ Client website for Silatik platform
 
 ## Demo
 
-[https://silatik-web.vercel.app](https://silatik-web.vercel.app)
+- [https://silatik-web.vercel.app](https://silatik-web.vercel.app)
+- [Video](https://youtu.be/FTaakyD9dwc)
 
 ## Environment Variables
 
