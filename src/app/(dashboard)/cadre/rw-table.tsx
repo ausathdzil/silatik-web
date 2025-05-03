@@ -23,7 +23,6 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import {
-  BanknoteArrowUpIcon,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -31,10 +30,11 @@ import {
   ChevronUp,
   SearchIcon,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { AddCadre } from './add-cadre';
 import { fetchRWList } from './data';
 import { RW } from './data/definitions';
+import { ProcessPayroll } from './process-payroll';
 import { RTTable } from './rt-table';
 
 export const riskLevelColors = {
@@ -53,7 +53,7 @@ export function RWTable() {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [rwData, setRWData] = useState<RW[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const loadData = async () => {
       const data = await fetchRWList();
       setRWData(data);
@@ -258,10 +258,7 @@ export function RWTable() {
         </div>
         <div className="flex items-center gap-4">
           <AddCadre />
-          <Button>
-            <BanknoteArrowUpIcon />
-            Process Payroll
-          </Button>
+          <ProcessPayroll />
         </div>
       </div>
       <div className="overflow-hidden rounded-md border tabular-nums">
@@ -291,7 +288,7 @@ export function RWTable() {
                 const rw = row.original;
                 const isExpanded = expandedRows.has(rw.rwId);
                 return (
-                  <React.Fragment key={rw.rwId}>
+                  <Fragment key={rw.rwId}>
                     <TableRow
                       className="hover:bg-muted/50"
                       onClick={() => rw.rts && toggleRow(rw.rwId)}
@@ -315,7 +312,7 @@ export function RWTable() {
                         </TableCell>
                       </TableRow>
                     )}
-                  </React.Fragment>
+                  </Fragment>
                 );
               })
             ) : (
