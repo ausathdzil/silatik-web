@@ -3,9 +3,10 @@
 
 Client website for Silatik platform
 
-## Authors
+## Related Projects
 
-- [@ausathdzil](https://www.github.com/ausathdzil)
+- [Silatik Mobile](https://github.com/Ramdhik/silatik-mobile)
+- [Silatik API](https://github.com/valuin/silatik-api)
 
 ## Demo
 
