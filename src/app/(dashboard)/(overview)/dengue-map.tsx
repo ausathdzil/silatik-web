@@ -1,16 +1,17 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { FeatureCollection, Point } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEffect, useRef, useState } from 'react';
-import { mockDengueData } from './data/mock-dengue-data';
+import { Household } from '../cadre/data/definitions';
 
-const INITIAL_CENTER = [106.79544, -6.30916] as [number, number];
-const INITIAL_ZOOM = 14.99;
+const INITIAL_CENTER = [107.61706, -6.89135] as [number, number];
+const INITIAL_ZOOM = 14.89;
 const MAPBOX_STYLE = 'mapbox://styles/mapbox/dark-v11';
 
-export function DengueMap() {
+export function DengueMap({ households }: { households: Household[] }) {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const [center, setCenter] = useState(INITIAL_CENTER);
@@ -24,6 +25,23 @@ export function DengueMap() {
       center: INITIAL_CENTER,
       zoom: INITIAL_ZOOM,
     });
+  };
+
+  const dengueData: FeatureCollection<Point, { severity: number }> = {
+    type: 'FeatureCollection',
+    features: households.map((household) => ({
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [
+          parseFloat(household.longitude),
+          parseFloat(household.latitude),
+        ],
+      },
+      properties: {
+        severity: parseInt(household.intensity),
+      },
+    })),
   };
 
   useEffect(() => {
@@ -51,7 +69,7 @@ export function DengueMap() {
     map.on('load', () => {
       map.addSource('dengue-cases', {
         type: 'geojson',
-        data: mockDengueData,
+        data: dengueData,
       });
 
       map.addLayer({
@@ -88,17 +106,17 @@ export function DengueMap() {
             ['linear'],
             ['heatmap-density'],
             0,
-            'rgba(33,102,172,0)',
+            'rgba(0,0,255,0)',
             0.2,
-            'rgb(103,169,207)',
+            'rgb(0,0,255)',
             0.4,
-            'rgb(209,229,240)',
+            'rgb(0,255,255)',
             0.6,
-            'rgb(253,219,199)',
+            'rgb(255,255,0)',
             0.8,
-            'rgb(239,138,98)',
+            'rgb(255,0,0)',
             1,
-            'rgb(178,24,43)',
+            'rgb(255,0,0)',
           ],
           'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 9, 20],
           'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, 1, 9, 0],
@@ -125,15 +143,15 @@ export function DengueMap() {
             ['linear'],
             ['get', 'severity'],
             1,
-            'rgba(33,102,172,0.8)',
+            'rgba(0,0,255,0.8)',
             2,
-            'rgba(103,169,207,0.8)',
+            'rgba(0,255,255,0.8)',
             3,
-            'rgba(209,229,240,0.8)',
+            'rgba(255,255,0,0.8)',
             4,
-            'rgba(239,138,98,0.8)',
+            'rgba(255,0,0,0.8)',
             5,
-            'rgba(178,24,43,0.8)',
+            'rgba(255,0,0,0.8)',
           ],
           'circle-stroke-color': 'white',
           'circle-stroke-width': 1,

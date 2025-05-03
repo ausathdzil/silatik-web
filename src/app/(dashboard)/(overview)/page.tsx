@@ -2,6 +2,7 @@ import {
   getAIInsight,
   getCaseDistributionByType,
   getCaseReport,
+  getHouseholds,
   getLarvaeByRW,
 } from '@/app/(dashboard)/(overview)/data';
 import {
@@ -11,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   BanIcon,
   BoxIcon,
@@ -18,21 +20,20 @@ import {
   LightbulbIcon,
   MapPinnedIcon,
 } from 'lucide-react';
+import { Suspense } from 'react';
 import { PageHeader } from '../page-header';
 import { CaseReportTable } from './case-report-table';
 import { DengueCaseChart, TypeDistributionChart } from './dashboard-charts';
 import { DengueMap } from './dengue-map';
-import { Suspense } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Dashboard() {
   return (
     <>
       <PageHeader>Dengue Fever Case Distribution Map</PageHeader>
       <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="min-h-[50vh] flex-1 rounded-xl bg-muted/50">
-          <DengueMap />
-        </div>
+        <Suspense fallback={<Skeleton />}>
+          <DengueMapCard />
+        </Suspense>
         <div className="grid auto-rows-min gap-4 md:grid-cols-2">
           <Suspense fallback={<Skeleton />}>
             <DengueCaseCard />
@@ -49,6 +50,16 @@ export default function Dashboard() {
         </Suspense>
       </main>
     </>
+  );
+}
+
+async function DengueMapCard() {
+  const households = await getHouseholds();
+  if (!households) return null;
+  return (
+    <div className="min-h-[50vh] flex-1 rounded-xl bg-muted/50">
+      <DengueMap households={households} />
+    </div>
   );
 }
 

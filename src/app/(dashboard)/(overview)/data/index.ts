@@ -1,9 +1,31 @@
+import { Household } from '../../cadre/data/definitions';
 import {
   AIInsight,
   CaseDistributionByType,
   CaseReport,
   LarvaeByRW,
 } from './definitions';
+
+export async function getHouseholds(): Promise<Household[] | null> {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/households`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) throw new Error('Failed to fetch data');
+
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    }
+    return null;
+  }
+}
 
 export async function getLarvaeByRW(): Promise<LarvaeByRW[] | null> {
   try {

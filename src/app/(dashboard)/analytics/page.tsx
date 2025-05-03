@@ -19,13 +19,14 @@ import {
   ThermometerSunIcon,
 } from 'lucide-react';
 import { Suspense } from 'react';
+import { getHouseholds } from '../(overview)/data';
 import { PageHeader } from '../page-header';
 import { ActionPlan } from './action-plan';
 import { RiskIndicatorChart } from './analytics-charts';
 import { AnalyticsMap } from './analytics-map';
 import { getActionPlan, getWeatherInsights } from './data';
 
-export default async function Analytics() {
+export default function Analytics() {
   return (
     <>
       <PageHeader>Analytics</PageHeader>
@@ -149,7 +150,10 @@ function InspectionsCard() {
   );
 }
 
-function SummaryMapCard() {
+async function SummaryMapCard() {
+  const households = await getHouseholds();
+  if (!households) return null;
+
   return (
     <Card>
       <CardHeader className="flex items-center gap-2">
@@ -157,7 +161,7 @@ function SummaryMapCard() {
         <CardTitle>Risk Summary Map</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-1">
-        <AnalyticsMap />
+        <AnalyticsMap households={households} />
       </CardContent>
     </Card>
   );
