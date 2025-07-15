@@ -1,10 +1,5 @@
 import { Household } from '../../cadre/data/definitions';
-import {
-  AIInsight,
-  CaseDistributionByType,
-  CaseReport,
-  LarvaeByRW,
-} from './definitions';
+import { AIInsight, CaseDistributionByType, CaseReport, LarvaeByRW } from './definitions';
 
 export async function getHouseholds(): Promise<Household[] | null> {
   try {
@@ -29,15 +24,12 @@ export async function getHouseholds(): Promise<Household[] | null> {
 
 export async function getLarvaeByRW(): Promise<LarvaeByRW[] | null> {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/web/dashboard/distribution/larvae-by-rw`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/web/dashboard/distribution/larvae-by-rw`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
     if (!res.ok) throw new Error('Failed to fetch data');
 
@@ -51,19 +43,14 @@ export async function getLarvaeByRW(): Promise<LarvaeByRW[] | null> {
   }
 }
 
-export async function getCaseDistributionByType(): Promise<
-  CaseDistributionByType[] | null
-> {
+export async function getCaseDistributionByType(): Promise<CaseDistributionByType[] | null> {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/web/dashboard/distribution/larvae-by-area-type`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/web/dashboard/distribution/larvae-by-area-type`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
     if (!res.ok) throw new Error('Failed to fetch data');
 
@@ -76,15 +63,19 @@ export async function getCaseDistributionByType(): Promise<
     return null;
   }
 }
+
+
+export async function getIncidence(): Promise<number | null> {
+  // MOCK DATA: ganti dengan API call jika backend sudah siap
+  return 42; // contoh angka incidence
+}
+
 
 export async function getAIInsight(): Promise<AIInsight | null> {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/ai/distribution-insights`,
-      {
-        method: 'POST',
-      }
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ai/distribution-insights`, {
+      method: 'POST',
+    });
 
     if (!res.ok) throw new Error('Failed to fetch data');
 
@@ -100,12 +91,9 @@ export async function getAIInsight(): Promise<AIInsight | null> {
 
 export async function getCaseReport(): Promise<CaseReport[] | null> {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/web/dashboard/inspections-history`,
-      {
-        method: 'GET',
-      }
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/web/dashboard/inspections-history`, {
+      method: 'GET',
+    });
 
     if (!res.ok) throw new Error('Failed to fetch data');
 
