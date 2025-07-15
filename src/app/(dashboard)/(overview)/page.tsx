@@ -33,6 +33,18 @@ export default function Dashboard() {
       <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
         <Suspense fallback={<Skeleton />}>
           <DengueMapCard />
+          <div className="mt-4 flex flex-col items-center">
+            <div className="flex gap-4 items-center">
+              <LegendItem color="rgba(0,0,255,0.8)" label="1 (Low)" />
+              <LegendItem color="rgba(0,255,255,0.8)" label="2" />
+              <LegendItem color="rgba(255,255,0,0.8)" label="3" />
+              <LegendItem color="rgba(255,0,0,0.8)" label="4" />
+              <LegendItem color="rgba(255,0,0,0.8)" label="5 (High)" />
+            </div>
+            <span className="text-xs text-muted-foreground mt-1">
+              Severity Level
+            </span>
+          </div>
         </Suspense>
         <div className="grid auto-rows-min gap-4 md:grid-cols-2">
           <Suspense fallback={<Skeleton />}>
@@ -57,8 +69,20 @@ async function DengueMapCard() {
   const households = await getHouseholds();
   if (!households) return null;
   return (
-    <div className="min-h-[50vh] flex-1 rounded-xl bg-muted/50">
+    <div className="min-h-[60vh] flex-1 rounded-xl bg-muted/50 flex flex-col">
       <DengueMap households={households} />
+    </div>
+  );
+}
+
+function LegendItem({ color, label }: { color: string; label: string }) {
+  return (
+    <div className="flex flex-col items-center">
+      <span
+        className="inline-block w-5 h-5 rounded-full border border-gray-300 mb-1"
+        style={{ backgroundColor: color }}
+      />
+      <span className="text-xs text-gray-700">{label}</span>
     </div>
   );
 }
