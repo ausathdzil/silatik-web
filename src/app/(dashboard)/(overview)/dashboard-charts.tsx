@@ -140,3 +140,59 @@ export function TypeDistributionChart({
     </ChartContainer>
   );
 }
+
+export function HouseIndexChart() {
+  // Mock data langsung di sini
+  const houseIndexByRW = [
+    { rwName: 'RW 01', houseIndex: 12 },
+    { rwName: 'RW 02', houseIndex: 18 },
+    { rwName: 'RW 03', houseIndex: 25 },
+    { rwName: 'RW 04', houseIndex: 9 },
+    { rwName: 'RW 05', houseIndex: 20 },
+  ];
+
+  const chartData = houseIndexByRW.map((item, index) => ({
+    ...item,
+    fill: `hsl(var(--chart-${index + 1}))`,
+  }));
+
+  return (
+    <ChartContainer
+      config={Object.fromEntries(
+        chartData.map((item, idx) => [
+          item.rwName,
+          { label: item.rwName, color: `hsl(var(--chart-${idx + 1}))` },
+        ])
+      )}
+    >
+      <BarChart
+        data={chartData}
+        layout="vertical"
+        margin={{ left: 24, right: 24 }}
+      >
+        <CartesianGrid horizontal={false} />
+        <YAxis
+          dataKey="rwName"
+          type="category"
+          tickLine={false}
+          tickMargin={10}
+          axisLine={false}
+        />
+        <XAxis dataKey="houseIndex" type="number" />
+        <ChartTooltip
+          cursor={false}
+          content={<ChartTooltipContent nameKey="rwName" hideLabel />}
+        />
+        <Bar dataKey="houseIndex" layout="vertical" radius={5}>
+          <LabelList
+            dataKey="houseIndex"
+            position="insideRight"
+            offset={8}
+            className="fill-primary-foreground"
+            fontSize={12}
+          />
+        </Bar>
+      </BarChart>
+    </ChartContainer>
+  );
+}
