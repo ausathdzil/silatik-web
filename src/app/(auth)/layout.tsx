@@ -12,8 +12,8 @@ export default function AuthLayout({
             className="flex items-center gap-2 font-medium font-monomaniac-one text-primary-foreground text-2xl"
             href="/"
           >
-            <Image src="/logo.svg" alt="Silatik logo" width={24} height={24} />
-            SILATIK
+            <Image src="/logo.svg" alt="Silantik logo" width={24} height={24} />
+            SILANTIK
           </Link>
         </div>
         {children}

@@ -1,11 +1,11 @@
-# Silatik Web
+# Silantik Web
 
-Client website for Silatik platform
+Client website for Silantik platform
 
 ## Related Projects
 
-- [Silatik Mobile](https://github.com/Ramdhik/silatik-mobile)
-- [Silatik API](https://github.com/valuin/silatik-api)
+- [Silantik Mobile](https://github.com/Ramdhik/silatik-mobile)
+- [Silantik API](https://github.com/valuin/silatik-api)
 
 ## Demo
 
@@ -16,11 +16,11 @@ Client website for Silatik platform
 
 To run this project, you will need to add the following environment variables to your .env file
 
-`NEXT_PUBLIC_API_URL`=
+`NEXT_PUBLIC_API_URL`
 
-`NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`=
+`NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`
 
-`DATABASE_URL`=
+`DATABASE_URL`
 
 ## Run Locally
 

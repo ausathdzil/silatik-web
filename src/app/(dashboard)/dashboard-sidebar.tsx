@@ -5,6 +5,7 @@ import {
   ClipboardCheckIcon,
   LayoutDashboardIcon,
   SettingsIcon,
+  SmartphoneIcon,
   UserRoundCogIcon,
 } from 'lucide-react';
 
@@ -46,6 +47,11 @@ const data = {
       icon: ClipboardCheckIcon,
       url: '/metrics',
     },
+    {
+      title: 'Silantik Mobile',
+      icon: SmartphoneIcon,
+      url: '/mobile',
+    },
   ],
   navSecondary: [
     {
@@ -64,7 +70,7 @@ export function DashboardSidebar() {
           <SidebarMenuButton className="flex justify-center" asChild>
             <Link href="/">
               <Image src="/logo.svg" alt="logo" width={20} height={20} />
-              <span className="font-monomaniac-one text-xl">SILATIK</span>
+              <span className="font-monomaniac-one text-xl">SILANTIK</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenu>

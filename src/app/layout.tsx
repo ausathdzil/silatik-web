@@ -15,7 +15,7 @@ const monomaniacOne = Monomaniac_One({
 });
 
 export const metadata: Metadata = {
-  title: 'Silatik',
+  title: 'Silantik',
   description: '',
 };
 
