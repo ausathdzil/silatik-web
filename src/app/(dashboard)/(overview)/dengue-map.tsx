@@ -1,11 +1,17 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { FeatureCollection, Point } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Household } from '../cadre/data/definitions';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 const INITIAL_CENTER = [107.61706, -6.89135] as [number, number];
 const INITIAL_ZOOM = 14.89;
@@ -14,8 +20,6 @@ const MAPBOX_STYLE = 'mapbox://styles/mapbox/dark-v11';
 export function DengueMap({ households }: { households: Household[] }) {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const [center, setCenter] = useState(INITIAL_CENTER);
-  const [zoom, setZoom] = useState(INITIAL_ZOOM);
 
   const dengueData = useMemo<FeatureCollection<Point, { severity: number }>>(
     () => ({
@@ -37,16 +41,6 @@ export function DengueMap({ households }: { households: Household[] }) {
     [households]
   );
 
-  const handleResetZoom = () => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    map.flyTo({
-      center: INITIAL_CENTER,
-      zoom: INITIAL_ZOOM,
-    });
-  };
-
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -60,14 +54,6 @@ export function DengueMap({ households }: { households: Household[] }) {
     });
 
     mapRef.current = map;
-
-    map.on('move', () => {
-      const mapCenter = map.getCenter();
-      const mapZoom = map.getZoom();
-
-      setCenter([mapCenter.lng, mapCenter.lat]);
-      setZoom(mapZoom);
-    });
 
     map.on('load', () => {
       map.addSource('dengue-cases', {
@@ -183,15 +169,33 @@ export function DengueMap({ households }: { households: Household[] }) {
         className="size-full rounded-xl"
         ref={mapContainerRef}
       />
-      <div className="absolute top-4 left-4 bg-white/90 p-2 rounded-lg shadow-lg w-[200px]">
-        <div className="text-sm text-gray-700 font-mono">
-          <div>Longitude: {center[0].toFixed(4)}</div>
-          <div>Latitude: {center[1].toFixed(4)}</div>
-          <div>Zoom: {zoom.toFixed(2)}</div>
-        </div>
-        <Button onClick={handleResetZoom} size="sm" className="mt-2 w-full">
-          Reset View
-        </Button>
+      <div className="absolute top-4 left-4 z-10">
+        <Card className="w-[260px] shadow-lg">
+          <CardHeader>
+            <CardTitle>Angka Bebas Jentik</CardTitle>
+            <CardDescription>
+              <div className="flex flex-col items-start text-xs mt-1">
+                <span className="font-mono">N/tempat bebas jentik</span>
+                <div className="w-full flex items-center">
+                  <div className="border-t border-gray-400 w-40 my-0.5" />
+                  <span className="ml-2 font-mono">&times; 100%</span>
+                </div>
+                <span className="font-mono">N/tempat yang diperiksa</span>
+                <span className="text-muted-foreground mt-1">
+                  N = jumlah rumah
+                </span>
+              </div>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-1">
+              <span className="text-3xl font-bold text-emerald-500">92.5%</span>
+              <span className="text-muted-foreground text-xs">
+                185 dari 200 rumah bebas jentik
+              </span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
